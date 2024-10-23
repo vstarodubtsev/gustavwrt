@@ -1,0 +1,58 @@
+#!/bin/sh /etc/rc.common
+
+START=80
+STOP=99
+
+USE_PROCD=1
+PROG=/sbin/gustavd
+OOM_ADJ=-17
+
+start_service() {
+	[ -d /sys/kernel/config/usb_gadget ] || {
+		mount -t configfs none /sys/kernel/config
+		mkdir /sys/kernel/config/usb_gadget/g1
+		echo "0x1e0e" > /sys/kernel/config/usb_gadget/g1/idVendor
+		echo "0x9011" > /sys/kernel/config/usb_gadget/g1/idProduct
+		mkdir /sys/kernel/config/usb_gadget/g1/strings/0x409
+		echo "Slomblobov" > /sys/kernel/config/usb_gadget/g1/strings/0x409/manufacturer
+		echo "Gustav" > /sys/kernel/config/usb_gadget/g1/strings/0x409/product
+		echo S90110001 > /sys/kernel/config/usb_gadget/g1/strings/0x409/serialnumber
+	}
+	[ -d /sys/kernel/config/usb_gadget/g1/configs/c.1 ] || {
+		mkdir /sys/kernel/config/usb_gadget/g1/configs/c.1
+		#echo 0xc0 > /sys/kernel/config/usb_gadget/g1/configs/c.1/bmAttributes
+		echo 500 > /sys/kernel/config/usb_gadget/g1/configs/c.1/MaxPower
+		mkdir /sys/kernel/config/usb_gadget/g1/configs/c.1/strings/0x409
+	}
+	[ -d /sys/kernel/config/usb_gadget/g1/functions/rndis.0 ] || {
+		mkdir /sys/kernel/config/usb_gadget/g1/functions/rndis.0
+	}
+	[ -d /sys/kernel/config/usb_gadget/g1/functions/gser.0 ] || {
+		mkdir /sys/kernel/config/usb_gadget/g1/functions/gser.0
+	}
+	[ -d /sys/kernel/config/usb_gadget/g1/functions/gser.1 ] || {
+		mkdir /sys/kernel/config/usb_gadget/g1/functions/gser.1
+	}
+	[ -e /sys/kernel/config/usb_gadget/g1/configs/c.1/f0 ] || {
+		ln -s /sys/kernel/config/usb_gadget/g1/functions/rndis.0/ /sys/kernel/config/usb_gadget/g1/configs/c.1/f0
+	}
+	[ -e /sys/kernel/config/usb_gadget/g1/configs/c.1/f1 ] || {
+		ln -s /sys/kernel/config/usb_gadget/g1/functions/gser.0/ /sys/kernel/config/usb_gadget/g1/configs/c.1/f1
+	}
+	[ -e /sys/kernel/config/usb_gadget/g1/configs/c.1/f2 ] || {
+		ln -s /sys/kernel/config/usb_gadget/g1/functions/gser.1/ /sys/kernel/config/usb_gadget/g1/configs/c.1/f2
+	}
+
+	echo ci_hdrc > /sys/kernel/config/usb_gadget/g1/UDC
+
+	procd_open_instance
+	procd_set_param oom_score_adj $OOM_ADJ
+
+	procd_set_param command $PROG /dev/ttyGS1
+	procd_close_instance
+}
+
+shutdown() {
+	echo shutdown
+	echo "" > /sys/kernel/config/usb_gadget/g1/UDC
+}
