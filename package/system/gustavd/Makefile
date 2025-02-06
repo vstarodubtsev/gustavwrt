@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gustavd
-PKG_VERSION:=1.0
+PKG_VERSION:=1.3
 
 PKG_RELEASE:=1
 CMAKE_INSTALL:=1
@@ -10,7 +10,7 @@ PKG_FLAGS:=nonshared
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/vstarodubtsev/gustavd.git
 PKG_SOURCE_VERSION:=$(PKG_VERSION)
-PKG_MIRROR_HASH:=ed8cdb20f2361049ad8d43f8a96b6020328870edcf9cc898d0619df4c033fdde
+PKG_MIRROR_HASH:=4ee6f0e2acc61dfb678eae35a5d02b36646a9825a1a770d28eb510433fdf2b02
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
